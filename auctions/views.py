@@ -114,12 +114,13 @@ def register(request):
 def listing(request, listing_id):
     try:
         auction = Auction.objects.get(id=listing_id)
-       
-        
+        bid = BidForm()
+        comment = CommentForm()
+            
     except Auction.DoesNotExist:
         raise Http404("Listing not found.")
 
-    return render(request, "auctions/listing.html",{"auction":auction, })
+    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, })
 
 
 @login_required
@@ -193,101 +194,50 @@ def add_to_wishlist(request, id):
 
 @login_required
 def bid(request, id):
-    listing = get_object_or_404(Auction, id=id)
-
-    if listing is not None:
-
-        if request.method == 'POST':
-            bidder = request.user
-            bid = BidForm(request.POST)
-            bid_price = float(request.POST('bid_price'))
-
-            if bid.is_valid():
-               
-                instance = bid.save(commit=False)
-                instance.user = request.user
+    auction = get_object_or_404(Auction, pk=id)
+    bid = BidForm(request.POST or None, request.FILES)
+    user = request.user
+    if request.method == "POST" and bid.is_valid():
+        instance = bid.save(commit=False)
+        instance.bidder=user
+        instance.bid_price = float(request.POST.get('bid_price'))
+        # bid.instance.listing_id = auction.id  
+        if  instance.bid_price >= auction.price:
+            if auction.current_bid is None:
+                auction.current_bid = instance.bid_price
+                auction.buyer = user
+                auction.price = instance.bid_price
                 instance.save()
-                return HttpResponseRedirect('/thanks/')
+                auction.save()
+                messages.success(request, "Bid Saved successfully, We will contact you if you win this bid")
 
+            elif instance.bid_price > auction.current_bid:
+                auction.current_bid = instance.bid_price
+                auction.buyer = user
+                # bid.user = user
+                # bid.listing_id = auction.id
+                auction.price = instance.bid_price
+                instance.save()
+                auction.save()
+                messages.success(request, "Bid Saved successfully, We will contact you if you win this bid")
+            
+            else:
+                messages.error(request, "Bid is lower than current bid")
+            
+            
         else:
-            bid=BidForm()
-
-            return render(request, "auctions/listing.html", {'bid' : bid})
-
-            # if bid_price >= listing.price:
-            #     if listing.current_bid is None:
-            #         listing.current_bid = bid_price
-                    
-
-
-      
-
+            messages.error(request, " Bid is lower than starting price")
+            
     else:
-        raise Http404('listing does not exists')
-    
+        bid=BidForm()
+        return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, })
 
 
 
-
-    # auction = get_object_or_404(Auction, id=id)
-    # bid = BidForm()
-    # user = request.user
-    # if request.method == "POST":
-    #     bid_price = float(request.POST.get('bid_price'))
-    #     if bid_price >= auction.price:
-    #         if auction.current_bid is None:
-    #             auction.current_bid = bid_price
-    #             auction.buyer = user
-    #             bid.user = user
-    #             bid.id = auction.id
-    #             # auction.price = bid_price
-    #             bid.save()
-    #             auction.save()
-    #             return HttpResponseRedirect(reverse('listing', args=auction.id))
-    #         elif bid_price> auction.current_bid:
-    #             auction.current_bid = bid_price
-    #             auction.buyer = user
-    #             bid.user = user
-    #             bid.auction_id = auction.id
-    #             # auction.price = bid_price
-    #             bid.save()
-    #             auction.save()
-    #             return HttpResponse('saved 1')
-    #         return HttpResponse('saved')
-    #     else:
-    #         HttpResponse('E no work!')
-    # else:
-    #     return HttpResponse('form probs')
+    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, })
 
 
 
-
-
-
-
-
-
-
-    
-    # if request.method == 'POST':
-    #     form= BidForm(request.POST)
-    #     bid_price = request.POST.get('bid_price')
-        
-
-
-    #     if form.is_valid():
-            
-            
-    #         if bid.bid_price <= auction.price:
-    #             messages.error(request, " Bid is lower than or equals" + auction.price)
-    #         else:
-    #             bid = Bid.objects.create(bid_price)
-    #             form.save()
-    #             messages.success(request, "Your bid of " + bid_price + " was placed successfully!")
-    #         return redirect(request.META["HTTP_REFERER"])
-    #     else:
-    #         messages.error(request, "Fill the form please")
-    #         return redirect(request.META["HTTP_REFERER"])
-    
-    
-    # return render(request, "auctions/listing.html", {'form': form})
+@login_required
+def addcomment(request, id):
+    pass

@@ -166,6 +166,6 @@ class Bid(models.Model):
     listing_id = models.ForeignKey(Auction, on_delete=models.CASCADE, null="True")
 
     def __str__(self):
-        return f"{self.user}-{self.bid_price} -{self.listing_id}"
+        return f"{self.listing_id}"
 
 

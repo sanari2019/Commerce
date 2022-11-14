@@ -45,10 +45,19 @@ class CreateForm(forms.ModelForm):
 class BidForm(ModelForm):
     class Meta:
         model = Bid
-        fields = "__all__"
+        fields = ['bid_price']
 
         widgets = {
             'bid_price': forms.NumberInput(attrs={'class':'bid_input'}),
+        }
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['comment']
+
+        widgets = {
+            'comment': forms.Textarea(attrs={'class':'form-control'}),
         }
 
 
