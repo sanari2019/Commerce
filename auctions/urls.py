@@ -14,6 +14,8 @@ urlpatterns = [
     path("wishlist", views.wishlist, name="wishlist"),
     path("wishlist/add_to_wishlist/<int:id>", views.add_to_wishlist, name="add_to_wishlist"), 
     path("bid/<int:id>", views.bid, name="bid"),
+    #  path("wishlist", views.wishlist, name="comments"),
+    path("comment/<int:id>", views.comment, name="comment"),
     path('<slug:category_slug>', views.index, name='auctions_by_category'),
     # path("listing/<int:listing_id>",)
 ]

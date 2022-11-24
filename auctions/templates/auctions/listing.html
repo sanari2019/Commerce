@@ -1001,7 +1001,7 @@
 
                     <div class="form-input">
                         <label for="bid"></label> {% csrf_token %} {{bid.as_p}}
-
+                        <input type="hidden" value="{{ item.id }}" name="item_id">
                         <button class="subscribe-btn" type="submit" min={{auction.price}}>Bid</button>
                     </div>
                 </form>
@@ -1033,7 +1033,7 @@
     {% endif %} -->
     </div>
 
-    <div class="tabs"> <input name="tabs" id="tab1" checked="" type="radio"> <label for="tab1"><span>Description</span></label> <input name="tabs" id="tab2" type="radio"> <label for="tab2"><span>Payment</span></label> <input name="tabs" id="tab3" type="radio"> <label for="tab3"><span>Delivery</span></label>        <input name="tabs" id="tab4" type="radio"> <label for="tab4"><span>Returns</span></label>
+    <div class="tabs"> <input name="tabs" id="tab1" checked="" type="radio"> <label for="tab1"><span>Description</span></label> <input name="tabs" id="tab2" type="radio"> <label for="tab2"><span>Comments</span></label> <input name="tabs" id="tab3" type="radio"> <label for="tab3"><span>Delivery</span></label>        <input name="tabs" id="tab4" type="radio"> <label for="tab4"><span>Returns</span></label>
         <div id="tab-content1" class="tab-content">
             <div class="row">
                 <div class="col-sm-6"></div>
@@ -1060,8 +1060,17 @@
             </div>
         </div>
         <div id="tab-content2" class="tab-content"><br>
-            <h1>Payment Information</h1>
-            <p>We accept PayPal payment.</p>
+            <h1>Comments</h1>
+            <p><form action="{% url 'comment' auction.id%}" class="card-content" method="POST" style="margin-top:8px;">
+                <label for="comment"></label> {% csrf_token %} {{com.as_p}}
+                        <input type="hidden" value="{{ item.id }}" name="item_id">
+                        <button class="subscribe-btn" type="submit">Comment</button>
+            </form></p>
+{% comment %}          
+            {% for comment in comments %}
+                {{ comment }}
+            {% endfor %} {% endcomment %}
+           
         </div>
         <div id="tab-content3" class="tab-content"><br>
             <h1>Shipping Information</h1>

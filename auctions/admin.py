@@ -8,12 +8,14 @@ from .models import User
 
 class AuctionAdmin(admin.ModelAdmin):
 	model = Auction
-	fields = ('category','title','description','image','image_preview','price','is_active','slug','wishlist','current_bid')
+	# fields = ('category','title','description','image','image_preview','price','is_active','slug','wishlist','current_bid','creator', 'buyer','creation_date'), 
 	list_display = ('image_preview','title','short_description','creation_date')
 	# list_display_links = ['title',]
 	list_filter = ['title','creation_date']
 	date_hierarchy = 'creation_date'
-	readonly_fields = ('creation_date','image_preview', 'slug','wishlist')
+	readonly_fields = ('creation_date','image_preview', 'slug','wishlist','creator')
+
+	
 
 	
 

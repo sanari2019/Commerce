@@ -63,12 +63,13 @@ class AuctionSpecification(models.Model):
 
 #For Auction product
 class Auction(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, null='True')
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='covers')
     title = models.CharField(max_length=64)
     slug = models.SlugField(max_length=255)
     price = models.FloatField(
-        help_text= ("Maximum 999.99"),
+        help_text= ("Sample: 999.99"),
         error_messages={
             "name": {
                 "max_length": ("The price must be between 0 and 999.99."),
@@ -81,8 +82,8 @@ class Auction(models.Model):
         help_text= ("Change product visibility"),
         default=True,
     )
-    creator = models.ForeignKey(User,on_delete=models.CASCADE,null=True, related_name="creator")
-    description = models.TextField(db_index=True, help_text=("Not Required"), blank=True)
+    
+    description = models.TextField(db_index=True, blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     wishlist = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="wishlist", blank=True)
     buyer = models.ForeignKey(User,on_delete=models.CASCADE,null=True, related_name="buyer")
@@ -92,7 +93,7 @@ class Auction(models.Model):
         ordering=('-creation_date',)
 
     def __str__(self):
-        return f"self.title"
+        return f"{self.title}"
 
     # def get_absolute_url(self):
     #    return reverse('auctions:auctions_detail',args=[self.id,])
@@ -106,8 +107,6 @@ class Auction(models.Model):
     image_preview.short_description = 'Image'
     image_preview.allow_tags= True
 
-    def creator(self):
-        return f"self.creator"
     
 
 
@@ -152,11 +151,11 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE)
     comment = models.CharField(max_length=100)
-    time_sent = models.DateTimeField()
+    time_sent = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
-        return f"{self.comment}"
+        return f"{self.auction_id}"
 
 
 class Bid(models.Model):

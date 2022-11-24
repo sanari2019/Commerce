@@ -14,7 +14,7 @@ class CreateForm(forms.ModelForm):
 
     class Meta:
         model = Auction
-        fields = "__all__"
+        fields = ['category','image','title', 'price','is_active','description']
 
         widgets = {
             'category': forms.Select(attrs={'class':'form-control'}),

@@ -46,7 +46,7 @@ def create(request):
         print(request.FILES)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.user = request.user
+            instance.creator = request.user
             instance.save()
         return HttpResponseRedirect(reverse('index'))
     return render(request, "auctions/create.html", {'form' : CreateForm})
@@ -115,12 +115,15 @@ def listing(request, listing_id):
     try:
         auction = Auction.objects.get(id=listing_id)
         bid = BidForm()
-        comment = CommentForm()
+        com = CommentForm()
+        comment = Comment.objects.filter(comment=listing_id)
+        
+        
             
     except Auction.DoesNotExist:
         raise Http404("Listing not found.")
 
-    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, })
+    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, "com":com, "comment":comment})
 
 
 @login_required
@@ -201,7 +204,7 @@ def bid(request, id):
         instance = bid.save(commit=False)
         instance.bidder=user
         instance.bid_price = float(request.POST.get('bid_price'))
-        # bid.instance.listing_id = auction.id  
+        instance.listing_id = Auction.objects.get(id=id)
         if  instance.bid_price >= auction.price:
             if auction.current_bid is None:
                 auction.current_bid = instance.bid_price
@@ -237,7 +240,29 @@ def bid(request, id):
     return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, })
 
 
+@login_required
+def comments(request, id):
+    auction= Auction.objects.get(id=id)
+    comment = Comment.objects.filter(comment= Auction.objects.get(auction_id=auction.title))
+    return render(request, "auctions/listing.html", {"comment": comment, "auction":auction})
+
+
+
 
 @login_required
-def addcomment(request, id):
-    pass
+def comment(request, id):
+    # auction= get_object_or_404(Auction, pk=id)
+    user = request.user
+    com = CommentForm(request.POST, request.FILES)
+    auction = get_object_or_404(Auction, slug= auction)
+    comments = auction.comments.all()
+    if request.method == "POST":
+        if com.is_valid():
+            instance = com.save(commit=False)
+            instance.user=user
+            instance.auction_id = Auction.objects.get(id=id)
+            instance.save()
+            messages.success(request, "Comment Saved successfully, We will contact you if you win this bid")
+        return HttpResponseRedirect(reverse('listing', args=(auction.id,)))
+       
+    return render(request, "auctions/listing.html", {'com' : com, "auction":auction, "comments":comments})
