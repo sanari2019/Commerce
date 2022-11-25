@@ -997,7 +997,7 @@
         <div class="dropdown fs">
             <a class="fs dropbtn" for="btnControl" href="https://contact.ebay.com/ws/eBayISAPI.dll?ContactUserNextGen&amp;recipient=tapika-store" target="_blank"><i class="fa fa-question-circle"></i> Make an offer</a>
             <div class="dropdown-content">
-                <form action="{% url 'bid' auction.id%}" class="card-content" method="POST" style="margin-top:8px;">
+                <form action="{% url 'bid' %}" class="card-content" method="POST" style="margin-top:8px;">
 
                     <div class="form-input">
                         <label for="bid"></label> {% csrf_token %} {{bid.as_p}}
@@ -1033,7 +1033,7 @@
     {% endif %} -->
     </div>
 
-    <div class="tabs"> <input name="tabs" id="tab1" checked="" type="radio"> <label for="tab1"><span>Description</span></label> <input name="tabs" id="tab2" type="radio"> <label for="tab2"><span>Comments</span></label> <input name="tabs" id="tab3" type="radio"> <label for="tab3"><span>Delivery</span></label>        <input name="tabs" id="tab4" type="radio"> <label for="tab4"><span>Returns</span></label>
+    <div class="tabs"> <input name="tabs" id="tab1" checked="" type="radio"> <label for="tab1"><span>Description</span></label> <input name="tabs" id="tab2" type="radio"> <label for="tab2"><span>Comments</span></label> <input name="tabs" id="tab3" type="radio"> <label for="tab3"><span>Delivery</span></label>    {% if request.user == auction.creator %}    <input name="tabs" id="tab4" type="radio"> <label for="tab4"><span>Close Bid</span></label> {% elif request.user == auction.buyer and auction.is_active="False" %}  <label for="tab4"><span>Bid Winner</span></label> {% endif %}
         <div id="tab-content1" class="tab-content">
             <div class="row">
                 <div class="col-sm-6"></div>
@@ -1066,11 +1066,37 @@
                         <input type="hidden" value="{{ item.id }}" name="item_id">
                         <button class="subscribe-btn" type="submit">Comment</button>
             </form></p>
-{% comment %}          
-            {% for comment in comments %}
-                {{ comment }}
-            {% endfor %} {% endcomment %}
-           
+
+            {% if comments %}
+            {% for comment in comments  %}
+          
+            <div class="card mb-3 rounded-0">
+              <div class="row g-0">
+                <div class="col-md-2">
+                 
+                    
+                    <img class="img-fluid d-block p-2" width="135px" src="/media/{{ auction.image }}"
+                      alt="{{ image.image.alt_text }}" />
+                   
+                 
+                </div>
+                <div class="col-md-10">
+                  <div class="card-body">
+                    <h5 class="card-title">{{comment.auction_id}}</h5>
+                    <p class="card-text">{{comment.comment}}</p>
+                    <p class="card-text"><small class="text-muted">{{comment.user}}</small></p>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            {% endfor %}
+            {% else %}
+            <p class="card-text">No Comment have been added to this item</p>
+            {% endif %}
+         
+       
         </div>
         <div id="tab-content3" class="tab-content"><br>
             <h1>Shipping Information</h1>
@@ -1080,8 +1106,11 @@
         </div>
         <div id="tab-content4" class="tab-content"><br>
             <h1>Returns Information</h1>
-            <p>Refund is only acceptable before we send out the files to you.</p>
-            <p><strong>*** If you are facing problems, we assure you that we will provide full assistance to resolve any problems you are facing. Simply send us a message through the eBay Messaging system.</strong></p>
+            <form action="{% url 'closelisting' auction.id%}" class="card-content" method="POST" style="margin-top:8px;">
+                {% csrf_token %} {{close.as_p}}
+                <input type="hidden" value="{{ item.id }}" name="item_id">
+                <button class="subscribe-btn" type="submit">Close Listing</button>
+            </form>
         </div>
     </div>
 

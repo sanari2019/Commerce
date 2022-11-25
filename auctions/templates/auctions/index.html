@@ -189,7 +189,9 @@
         
     <div class="row match-height" style="justify-content: center;" 
         <ul class="col-lg-4 col-md-12" >
+            
             {% for auction in auctions %}
+            {% if auction.is_active%}
             
             <div class="card text-center" style="width: 22%; margin: .5%;">
                 <li style="list-style-type: none;">
@@ -212,6 +214,7 @@
                     
                 </li>
             </div>
+            {% endif%}
             {% endfor %}
         </ul>
     </div>

@@ -116,14 +116,15 @@ def listing(request, listing_id):
         auction = Auction.objects.get(id=listing_id)
         bid = BidForm()
         com = CommentForm()
-        comment = Comment.objects.filter(comment=listing_id)
+        # close =CloseForm()
+        comments = Comment.objects.filter(auction_id=listing_id)
         
         
             
     except Auction.DoesNotExist:
         raise Http404("Listing not found.")
 
-    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, "com":com, "comment":comment})
+    return render(request, "auctions/listing.html",{"auction":auction,"bid":bid, "com":com, "comments":comments, })
 
 
 @login_required
@@ -196,7 +197,7 @@ def add_to_wishlist(request, id):
 
 
 @login_required
-def bid(request, id):
+def bid(request):
     auction = get_object_or_404(Auction, pk=id)
     bid = BidForm(request.POST or None, request.FILES)
     user = request.user
@@ -243,19 +244,22 @@ def bid(request, id):
 @login_required
 def comments(request, id):
     auction= Auction.objects.get(id=id)
+    bid = BidForm()
+    com = CommentForm()
     comment = Comment.objects.filter(comment= Auction.objects.get(auction_id=auction.title))
-    return render(request, "auctions/listing.html", {"comment": comment, "auction":auction})
+    return render(request, "auctions/listing.html", {"comment": comment, "auction":auction, "bid":bid, "com":com})
 
 
 
 
 @login_required
 def comment(request, id):
-    # auction= get_object_or_404(Auction, pk=id)
+    auction= get_object_or_404(Auction, pk=id)
     user = request.user
+    bid = BidForm()
     com = CommentForm(request.POST, request.FILES)
-    auction = get_object_or_404(Auction, slug= auction)
-    comments = auction.comments.all()
+    # auction = get_object_or_404(Auction, slug= auction)
+    # comments = auction.comments.all()
     if request.method == "POST":
         if com.is_valid():
             instance = com.save(commit=False)
@@ -265,4 +269,28 @@ def comment(request, id):
             messages.success(request, "Comment Saved successfully, We will contact you if you win this bid")
         return HttpResponseRedirect(reverse('listing', args=(auction.id,)))
        
-    return render(request, "auctions/listing.html", {'com' : com, "auction":auction, "comments":comments})
+    return render(request, "auctions/listing.html", {'com' : com, "auction":auction, "comments":comments, "bid":bid, "com":com})
+
+
+
+@login_required
+def closelisting(request, id):
+    auction = Auction.objects.get(id=id)
+    # close = CloseForm(request.POST, request.FILES)
+    bid = BidForm()
+    com = CommentForm()
+    if request.method == "POST":
+        # if close.is_valid():
+        if auction.is_active:
+            if request.user == auction.creator:
+                auction.is_active="False"
+                auction.save()
+                messages.success(request, "Listing is now inactive")
+               
+        else:
+            messages.error(request, "Listing is currently closed ")
+    # else:
+        # close = CloseForm()
+    
+    return render(request, "auctions/listing.html", { "auction":auction, "bid":bid, "com":com })
+    
